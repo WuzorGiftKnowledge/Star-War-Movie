@@ -5,6 +5,10 @@ const bodyParser = require("body-parser");
 const { inverse, green } = require("chalk");
 const _=require('lodash');
 
+const Movie = db.movies;
+const Comment = db.comments;
+
+
 
 const port = process.env.PORT || 3001;
 const request = require("request");
@@ -81,20 +85,22 @@ app.get("/api/movies", async (req, res) => {
     for (var i = 0; i < data2.count; i++) {
      
     data1= JSON.parse(JSON.stringify(data2.results[i]));
-    
-       mov={
+    const commentcount = await controller.countSpecificComment(data1.episode_id);
+    var count =commentcount[0];
+     count=count['Commentcount'];
+     mov={
         titles: data1.title,
         opening_crawl: data1.opening_crawl,
         release_date: data1.release_date,
         character: data1.character,
+        comment:count,
       }
       moviee.push(mov);
 
 } 
 moviee=_.orderBy(moviee,['titles'], ['desc']);
 console.log(moviee);
-var comments=await controller.countSpecific('comments','id', '1');
-console.log(comments);
+
 return   res.send({moviee});
 }catch (err) {
   return res.send({ error: "Requisition Failed", err });
@@ -217,9 +223,19 @@ const run = async () => {
     JSON.stringify(comment2Data, null, 2)
   );
 
+  const commentcount = await controller.countSpecificComment(mov1.id);
+ const count =commentcount[0];
+  console.log(count['Commentcount']);
+
+
   const movies = await controller.findAll();
   console.log(">> All movies", JSON.stringify(movies, null, 2));
+
+
+
 };
+
+
 
 db.sequelize.sync({ force: true }).then(() => {
   console.log("Drop and re-sync db.");

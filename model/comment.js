@@ -5,6 +5,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       text: {
         type: DataTypes.STRING
+      },
+      movieId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
       }
     });
   

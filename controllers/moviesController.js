@@ -1,5 +1,5 @@
 const db = require("../model");
-
+const Sequelize = require("sequelize");
 const Movie = db.movies;
 const Comment = db.comments;
 
@@ -52,10 +52,10 @@ exports.createComment = (movieId, comment) => {
 
 // Get the comments for a given tutorial
 exports.findMovieById = (movieId) => {
-  return Movie.findByPk(movieId, { include: ["comments"] })
+  return Movie.findByPk(movieId, { include: [Comment] })
     .then((movies) => {
       return movies;
-    })
+  })  
     .catch((err) => {
       console.log(">> Error while finding movie: ", err);
     });
@@ -63,7 +63,7 @@ exports.findMovieById = (movieId) => {
 
 // Get the comments for a given comment id
 exports.findCommentById = (id) => {
-  return Comment.findByPk(id, { include: ["movies"] })
+  return Comment.findByPk(id, { include: [Movie] })
     .then((comment) => {
       return comment;
     })
@@ -75,18 +75,30 @@ exports.findCommentById = (id) => {
 // Get all Movies include comments
 exports.findAll = () => {
   return Movie.findAll({
-    include: ["comments"],
+    include: [Comment],
   }).then((movies) => {
     return movies;
   });
 };
 
 // Get all counts of  comments
-exports.countSpecific = (table, item, value) => {
-  return table.count({where:{item:value}
+exports.countSpecificComment = ( movieId) => {
+ return Comment.findAll({ where:{movieId:movieId},
+    attributes: 
+       ['movieId', [Sequelize.fn("COUNT", Sequelize.col("movieId")), "Commentcount" ]],
+     raw:true,
+}) .then((commentCount) => {
+  console.log(commentCount);
+  return commentCount;
+})
+.catch((err) => {
+  console.log(">> Error while finding comment: ", err);
+});
+ 
+ /// return Movie.findAndCountAll({include:["comments"]
   
-  });
-}
+ // });
+};
 
 
 
